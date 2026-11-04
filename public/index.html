@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lost &amp; Found Intelligence System</title>
+<style>
+:root{--bg:#f6f7f9;--cd:#e2b6f6;--tx:#1a1d23;--mu:#667085;--bd:#e3e6eb;--ac:#4e3415;--er:#dc2626}
+@media(prefers-color-scheme:light){:root{--bg:#0f1115;--cd:#181b22;--tx:#e8eaee;--mu:#98a2b3;--bd:#2a2f3a;--ac:#6ea0ff;--er:#f87171}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,sans-serif}
+h1{font-size:20px;margin:0;padding:16px 20px 8px}nav{display:flex;gap:4px;overflow-x:auto;padding:0 20px;border-bottom:1px solid var(--bd)}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px;color:var(--mu);font:inherit;cursor:pointer;white-space:nowrap}nav button.on{color:var(--ac);border-color:var(--ac);font-weight:600}
+main{padding:16px 20px;max-width:1250px;margin:auto}.cd{background:var(--cd);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}h2{font-size:15px;margin:0 0 10px}
+.sc{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:6px 9px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}th{color:var(--mu)}
+.bar,.fm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}.mu{color:var(--mu)}.err{color:var(--er)}
+select,input,button{font:inherit;padding:6px 9px;border:1px solid var(--bd);border-radius:7px;background:var(--cd);color:var(--tx)}
+main button{background:var(--ac);color:#fff;border-color:var(--ac);cursor:pointer}main button.s{background:none;color:var(--ac)}input{min-width:160px}pre{overflow-x:auto}
+</style></head><body><h1>Lost &amp; Found Intelligence System <span class="mu" style="font-size:12px;font-weight:400">Node · Express · MySQL</span></h1><nav id="n"></nav><main id="m"></main>
+<script>
+const $=s=>document.querySelector(s),F={};
+const api=async(u,m,b)=>{const r=await fetch('/api/'+u,m?{method:m,headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})}:undefined),j=await r.json();if(!r.ok){if(r.status==401&&ME){ME=null;go()}throw new Error(j.error)}return j};
+const cell=v=>v&&typeof v=='object'?JSON.stringify(v):String(v??''),e=s=>cell(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const tb=(r,a)=>r.length?`<div class="sc"><table><tr>${Object.keys(r[0]).map(k=>`<th>${k}</th>`).join('')}${a?'<th></th>':''}</tr>${r.map(x=>`<tr>${Object.values(x).map(v=>`<td>${e(v)}</td>`).join('')}${a?`<td>${a(x)}</td>`:''}</tr>`).join('')}</table></div>`:'<p class="mu">No rows</p>';
+const sec=(t,h)=>`<div class="cd"><h2>${t}</h2>${h}</div>`;
+const sel=(k,o)=>`<select onchange="F.${k}=this.value;go()">${o.map(([v,l])=>`<option value="${v}"${F[k]==v?' selected':''}>${l}</option>`).join('')}</select>`;
+const act=async f=>{try{await f()}catch(x){alert(x.message)}go()};
+const btn=(l,f,s)=>`<button class="${s?'s':''}" onclick="act(()=>${f})">${l}</button>`;
+let tab='dash',ME=null,AR=false;
+async function dash(){const D=[['Similarity statistics &amp; total lost items (aggregates)','aggregate'],['Lost items per category (GROUP BY)','group_lost_by_category'],['Found items per status (GROUP BY)','group_found_by_status'],['Reports per user (LEFT JOIN)','lost_per_user'],['Lost vs found by category','category_lost_vs_found'],['Top match (subquery MAX)','top_match'],['Lost items in categories also found (IN)','lost_in_found_categories']];
+ return(await Promise.all(D.map(async([t,q])=>sec(t,tb(await api('q/'+q)))))).join('')}
+async function items(k){const L=k=='lost',[c,l]=await Promise.all(['category','location'].map(x=>api('crud/'+x))),o=a=>a.map(x=>`<option value="${x._id}">${e(x.name)}</option>`).join('');
+ const rows=await api(`q/${k}_list?status=${F[k+'s']||''}&order=${F[k+'o']||'asc'}&has=${F[k+'h']||''}`);
+ return sec('Report '+k+' item',`<div class="fm"><select id="c">${o(c)}</select><select id="l">${o(l)}</select><input id="t" placeholder="Title"><input id="d" placeholder="Description"><input id="i" placeholder="Image URL (optional)"><button onclick="rep('${k}')">Add</button></div><p id="er" class="err"></p><span class="mu">An empty title fires the BEFORE INSERT trigger; a valid lost item fires the AFTER INSERT audit trigger.</span>`)+
+ sec(k+' items',`<div class="bar">Status ${sel(k+'s',[['','All'],...(L?['ACTIVE','MATCHED','RETURNED']:['AVAILABLE','RETURNED']).map(x=>[x,x])])} Order by date ${sel(k+'o',[['asc','ASC'],['desc','DESC']])} Matches ${sel(k+'h',[['','All'],['yes','EXISTS (has match)'],['no','NOT EXISTS (no match)']])}</div>`+tb(rows,x=>ME.role!='ADMIN'?'':btn('Delete',`api('crud/${k}_item/${x._id}','DELETE')`,1)))}
+async function rep(k){try{await api('report/'+k,'POST',{category_id:+$('#c').value,location_id:+$('#l').value,title:$('#t').value,description:$('#d').value,image_url:$('#i').value});go()}catch(x){$('#er').textContent=x.message}}
+async function match(){const r=await api(`q/match_details?min=${F.mm||''}&status=${F.ms||''}`);
+ return sec('Matches (item_match_details)',`<div class="bar">${btn('Run matching engine',`api('match/run','POST').then(d=>alert(d.created+' new match(es)'))`)} Score ${sel('mm',[['','All, best first'],['0.9','≥ 0.90']])} Status ${sel('ms',[['','All'],['PENDING','PENDING'],['CONFIRMED','CONFIRMED']])}</div>`+
+ tb(r,x=>(x.status=='PENDING'&&ME.role=='ADMIN'?btn('Confirm',`api('crud/item_match/${x.match_id}','PUT',{status:'CONFIRMED'})`,1)+' ':'')+btn('Raise claim',`api('claims/from-match/${x.match_id}','POST')`)))}
+async function claim(){const r=await api('q/claim_details?status='+(F.cs||''));
+ return sec('Claims, verification &amp; returns (transactional approval)',`<div class="bar">Status ${sel('cs',[['','All'],['PENDING','PENDING'],['APPROVED','APPROVED']])}</div>`+tb(r,x=>x.status=='PENDING'&&ME.role=='ADMIN'?btn('Approve &amp; return',`api('claims/${x.claim_id}/approve','POST')`):''))}
+async function note(){const r=await api('q/note_list?status='+(F.ns||''));
+ return sec('Notifications',`<div class="bar">Show ${sel('ns',[['','All (newest first)'],['UNREAD','UNREAD only']])}</div>`+tb(r,x=>x.status=='UNREAD'?btn('Mark read',`api('crud/notification/${x._id}','PUT',{status:'READ',read_at:new Date()})`,1):''))}
+async function audit(){return sec('Audit log (filled by trigger)',tb((await api('crud/audit_log')).reverse(),x=>btn('Delete',`api('crud/audit_log/${x._id}','DELETE')`,1)))}
+const QL=['view_lost_item_details','view_item_match_details','view_claim_verification_details','fn_match_count','lost_list','found_list','proc_get_lost_items','proc_lost_by_status','distinct','aggregate','group_lost_by_category','group_found_by_status','lost_per_user','category_lost_vs_found','top_match','lost_in_found_categories','match_details','claim_details','note_list'];
+async function lab(){return sec('Run any query / view / procedure',`<div class="bar"><select id="qn">${QL.map(x=>`<option>${x}</option>`).join('')}</select><input id="qp" placeholder="params e.g. status=ACTIVE&amp;order=desc" size="34"><button onclick="runQ()">Run</button></div><div id="qr"></div>`)+
+ sec('Transactions on a lost item',`<div class="bar">Lost item id <input id="ti" value="10" size="4"><button onclick="runT('commit')">COMMIT</button><button class="s" onclick="runT('rollback')">ROLLBACK</button><button class="s" onclick="runT('savepoint')">SAVEPOINT</button></div><pre id="tr" class="mu"></pre>`)}
+async function runQ(){try{$('#qr').innerHTML=tb(await api(`q/${$('#qn').value}?${$('#qp').value}`))}catch(x){$('#qr').textContent=x.message}}
+async function runT(k){try{$('#tr').textContent=JSON.stringify(await api('tx/'+k,'POST',{id:+$('#ti').value}),null,1)}catch(x){$('#tr').textContent=x.message}}
+const tabs={dash:['Dashboard',dash],lost:['Lost items',()=>items('lost')],found:['Found items',()=>items('found')],match:['Matches',match],claim:['Claims',claim],note:['Notifications',note],audit:['Audit log',audit],lab:['DB lab',lab]};
+async function go(t){tab=t||tab;if(!ME){$('#n').innerHTML='';$('#m').innerHTML=authView();return}$('#n').innerHTML=Object.entries(tabs).filter(([k])=>k!='audit'||ME.role=='ADMIN').map(([k,[l]])=>`<button class="${k==tab?'on':''}" onclick="go('${k}')">${l}</button>`).join('')+`<span class="mu" style="margin-left:auto;padding:8px;white-space:nowrap">${e(ME.name)} (${ME.role}) <button class="s" onclick="out()" style="border:1px solid var(--bd);border-radius:7px;padding:2px 8px">Logout</button></span>`;
+ try{$('#m').innerHTML=await tabs[tab][1]()}catch(x){$('#m').innerHTML=`<p class="err">${e(x.message)}</p>`}}
+const authView=()=>sec(AR?'Create account':'Login',`<div class="fm"><input id="an" ${AR?'':'hidden'} placeholder="Full name"><input id="ae" placeholder="Email"><input id="ap" type="password" placeholder="Password"><button onclick="auth()">${AR?'Register':'Login'}</button><button class="s" onclick="AR=!AR;go()">${AR?'Have an account? Login':'New user? Register'}</button></div><p id="er" class="err"></p><span class="mu">Demo accounts: aarav@pes.edu = admin, shreya@pes.edu = user</span>`);
+async function auth(){try{ME=await api('auth/'+(AR?'register':'login'),'POST',{name:$('#an').value,email:$('#ae').value,password:$('#ap').value});go()}catch(x){$('#er').textContent=x.message}}
+async function out(){await api('auth/logout','POST');ME=null;go()}
+async function boot(){try{ME=await api('auth/me')}catch(x){}go()}boot();
+</script></body></html>
