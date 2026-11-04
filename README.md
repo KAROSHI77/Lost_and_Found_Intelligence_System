@@ -53,11 +53,16 @@ The database is named `lost_found_intelligence` and contains 14 tables covering 
 
 ```text
 Lost_and_Found_Intelligence_System/
-├── database/
-│   ├── schema.sql
-│   ├── seed.sql
-│   ├── setup.js
-│   └── queries.sql
+├database/
+├── schema.sql       
+├── seed.sql         
+├── setup.js          
+├── queries.sql       
+├── views.sql        
+├── procedures.sql    
+├── triggers.sql      
+├── transactions.sql  
+└── indexes.sql       
 ├── public/
 ├── server.js
 ├── package.json
