@@ -3,21 +3,16 @@
 
 USE lost_found_intelligence;
 
--- 1. Display all active lost items
 SELECT lost_item_id, title, description, lost_date_time
 FROM lost_item
 WHERE status = 'ACTIVE'
 ORDER BY lost_date_time DESC;
 
-
--- 2. Display all found items currently available
 SELECT found_item_id, title, description, found_date_time
 FROM found_item
 WHERE status = 'AVAILABLE'
 ORDER BY found_date_time DESC;
 
-
--- 3. Search lost items by category
 SELECT l.lost_item_id, l.title, c.name AS category,
        l.status, l.lost_date_time
 FROM lost_item l
@@ -25,8 +20,6 @@ JOIN category c ON l.category_id = c.category_id
 WHERE c.name = 'Electronics'
 ORDER BY l.lost_date_time DESC;
 
-
--- 4. Display potential matches with their similarity scores
 SELECT im.match_id,
        l.title AS lost_item,
        f.title AS found_item,
@@ -39,7 +32,7 @@ JOIN found_item f ON im.found_item_id = f.found_item_id
 ORDER BY im.similarity_score DESC;
 
 
--- 5. Find high-confidence matches (score >= 0.90)
+
 SELECT l.title AS lost_item,
        f.title AS found_item,
        im.similarity_score,
@@ -55,7 +48,7 @@ JOIN found_item f ON im.found_item_id = f.found_item_id
 ORDER BY im.similarity_score DESC;
 
 
--- 6. Count lost items in each category
+
 SELECT c.name AS category,
        COUNT(l.lost_item_id) AS total_lost_items
 FROM category c
@@ -64,14 +57,13 @@ GROUP BY c.category_id, c.name
 ORDER BY total_lost_items DESC, c.name;
 
 
--- 7. Count matches by status
 SELECT status, COUNT(*) AS total_matches
 FROM item_match
 GROUP BY status
 ORDER BY total_matches DESC;
 
 
--- 8. Find lost items that have no recorded match
+
 SELECT l.lost_item_id, l.title, l.status
 FROM lost_item l
 WHERE NOT EXISTS (
@@ -81,7 +73,6 @@ WHERE NOT EXISTS (
 );
 
 
--- 9. Display claims with claimant and item details
 SELECT cl.claim_id,
        u.name AS claimant,
        l.title AS lost_item,
@@ -95,7 +86,7 @@ JOIN found_item f ON cl.found_item_id = f.found_item_id
 ORDER BY cl.created_at DESC;
 
 
--- 10. Display unread notifications
+
 SELECT n.notification_id,
        u.name AS recipient,
        n.message,
@@ -105,8 +96,6 @@ JOIN user u ON n.user_id = u.user_id
 WHERE n.status = 'UNREAD'
 ORDER BY n.created_at DESC;
 
-
--- 11. Count items reported by each user
 SELECT u.user_id, u.name,
        COUNT(DISTINCT l.lost_item_id) AS lost_items_reported,
        COUNT(DISTINCT f.found_item_id) AS found_items_reported
@@ -117,7 +106,6 @@ GROUP BY u.user_id, u.name
 ORDER BY lost_items_reported DESC, found_items_reported DESC;
 
 
--- 12. Find categories with at least two lost items
 SELECT c.name AS category,
        COUNT(l.lost_item_id) AS total_lost_items
 FROM category c
