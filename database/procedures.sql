@@ -3,7 +3,6 @@
 
 USE lost_found_intelligence;
 
--- 1. Retrieve lost items by their status
 DROP PROCEDURE IF EXISTS GetLostItemsByStatus;
 
 DELIMITER //
@@ -23,10 +22,6 @@ END //
 
 DELIMITER ;
 
-
-
-
--- 2. Retrieve lost items with pagination
 DROP PROCEDURE IF EXISTS GetLostItems;
 
 DELIMITER //
@@ -47,9 +42,6 @@ END //
 DELIMITER ;
 
 
-
-
--- 3. Function: count matches for a lost item
 DROP FUNCTION IF EXISTS get_match_count;
 
 DELIMITER //
