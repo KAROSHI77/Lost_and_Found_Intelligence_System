@@ -3,8 +3,6 @@
 
 USE lost_found_intelligence;
 
--- 1. Before inserting a lost item:
-
 DROP TRIGGER IF EXISTS before_lost_item_insert;
 
 DELIMITER //
@@ -20,9 +18,6 @@ END //
 
 DELIMITER ;
 
-
--- 2. After inserting a lost item:
--- Record the insertion in the audit log.
 DROP TRIGGER IF EXISTS after_lost_item_insert;
 
 DELIMITER //
