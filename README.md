@@ -49,7 +49,9 @@ The database is named `lost_found_intelligence` and contains 14 tables covering 
 - **Subqueries:** Demonstrate operations using `IN`, `EXISTS`, `NOT EXISTS`, and aggregate subqueries.
 - **Transactions:** Use transactional claim approval and administrator transaction demonstrations.
 
-## Project Structure
+## 📁 Project Structure
+
+```text
 Lost_and_Found_Intelligence_System/
 ├── database/
 │   ├── schema.sql
@@ -71,6 +73,7 @@ Lost_and_Found_Intelligence_System/
 ├── .env.example
 ├── .gitignore
 └── README.md
+```
 
 
 ## Setup and Installation
