@@ -50,25 +50,28 @@ The database is named `lost_found_intelligence` and contains 14 tables covering 
 - **Transactions:** Use transactional claim approval and administrator transaction demonstrations.
 
 ## Project Structure
-
-```text
 Lost_and_Found_Intelligence_System/
-├database/
-├── schema.sql       
-├── seed.sql         
-├── setup.js          
-├── queries.sql       
-├── views.sql        
-├── procedures.sql    
-├── triggers.sql      
-├── transactions.sql  
-└── indexes.sql       
+├── database/
+│   ├── schema.sql
+│   ├── seed.sql
+│   ├── setup.js
+│   ├── queries.sql
+│   ├── views.sql
+│   ├── procedures.sql
+│   ├── triggers.sql
+│   ├── transactions.sql
+│   └── indexes.sql
+├── docs/
+│   └── ER_Diagram.md
 ├── public/
+│   └── index.html
 ├── server.js
 ├── package.json
 ├── package-lock.json
+├── .env.example
+├── .gitignore
 └── README.md
-```
+
 
 ## Setup and Installation
 
@@ -125,6 +128,10 @@ The current seed data includes these demonstration accounts:
 | User | `meera@pes.edu` |
 
 The existing project documentation specifies `password123` as the demo password. Confirm that the seeded password hashes correspond to this password before distributing the demo credentials.
+
+To access the website, start the application locally using npm start and open the link in browser.
+Local Website: http://localhost:3001
+
 
 ## Testing and Verification
 
