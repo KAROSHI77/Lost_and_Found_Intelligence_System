@@ -4,7 +4,6 @@
 
 USE lost_found_intelligence;
 
--- 1. View lost items with their category and location
 CREATE OR REPLACE VIEW lost_item_details AS
 SELECT
     l.lost_item_id,
@@ -18,7 +17,6 @@ FROM lost_item l
 JOIN category c ON l.category_id = c.category_id
 JOIN location loc ON l.location_id = loc.location_id;
 
--- 2. View lost-found matches with similarity scores
 CREATE OR REPLACE VIEW item_match_details AS
 SELECT
     im.match_id,
@@ -31,7 +29,6 @@ FROM item_match im
 JOIN lost_item l ON im.lost_item_id = l.lost_item_id
 JOIN found_item f ON im.found_item_id = f.found_item_id;
 
--- 3. View claims with verification details
 CREATE OR REPLACE VIEW claim_verification_details AS
 SELECT
     c.claim_id,
